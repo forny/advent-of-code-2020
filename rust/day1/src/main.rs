@@ -79,7 +79,7 @@ pub fn part2_simple(v: &Vec<i32>, search_sum: i32) -> i32 {
 }
 
 fn main() {
-    let content = fs::read_to_string("..\\..\\inputs\\day1_input.txt").expect("Cannot open file!");
+    let content = fs::read_to_string("../../inputs/day1_input.txt").expect("Cannot open file!");
     let h: HashSet<i32> = content.lines().map(|x| x.parse().unwrap()).collect();
 
     let result_p1 = part1(&h, 2020);
