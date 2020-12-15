@@ -2,8 +2,7 @@
 //! By Peter Fornwall
 
 fn get_number(start_seq: &[usize], nr_iterations: usize) -> usize {
-    let mut last_seen = Vec::with_capacity(nr_iterations);
-    last_seen.resize(nr_iterations, usize::MAX);
+    let mut last_seen = vec![usize::MAX; nr_iterations];
     for (index, &value) in start_seq[..(start_seq.len() - 1)].iter().enumerate() {
         last_seen[value] = index;
     }
