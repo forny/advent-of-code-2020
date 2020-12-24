@@ -55,7 +55,7 @@ fn part2(v: &[&str]) -> usize {
         let mut new_m = HashSet::new();
         for check in &m {
             let nr_black_neighbors = count_black_neighbors(&m, check);
-            if m.contains(&check) && (nr_black_neighbors == 1 || nr_black_neighbors == 2) {
+            if nr_black_neighbors == 1 || nr_black_neighbors == 2 {
                 new_m.insert(*check);
             }
             for (_, dir) in DIRS.iter() {
