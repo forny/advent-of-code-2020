@@ -5,6 +5,7 @@ use std::collections::HashSet;
 use std::fs;
 
 type COORD = i8;
+// map direction to coordinate delta
 static DIRS: [(&str, (COORD, COORD)); 6] = [
     ("se", (0, 1)),
     ("sw", (-1, 1)),
@@ -14,9 +15,9 @@ static DIRS: [(&str, (COORD, COORD)); 6] = [
     ("w", (-1, 0)),
 ];
 
-fn get_map(v: &[&str]) -> HashSet<(COORD, COORD)> {
-    let mut m: HashSet<(COORD, COORD)> = HashSet::new();
-    for line in v {
+fn get_black_tiles(init_flips: &[&str]) -> HashSet<(COORD, COORD)> {
+    let mut black_tiles: HashSet<(COORD, COORD)> = HashSet::new();
+    for line in init_flips {
         let mut i = 0;
         let mut pos = (0, 0);
         while i < line.len() {
@@ -27,47 +28,52 @@ fn get_map(v: &[&str]) -> HashSet<(COORD, COORD)> {
                 }
             }
         }
-        if m.contains(&pos) {
-            m.remove(&pos);
+        if black_tiles.contains(&pos) {
+            black_tiles.remove(&pos);
         } else {
-            m.insert(pos);
+            black_tiles.insert(pos);
         }
     }
-    m
+    black_tiles
 }
 
-fn part1(v: &[&str]) -> usize {
-    let m = get_map(v);
-    let result = m.len();
+fn part1(init_flips: &[&str]) -> usize {
+    let result = get_black_tiles(init_flips).len();
     println!("Part1: {}", result);
     result
 }
 
-fn count_black_neighbors(m: &HashSet<(COORD, COORD)>, check: &(COORD, COORD)) -> usize {
+fn count_black_neighbors(black_tiles: &HashSet<(COORD, COORD)>, check: &(COORD, COORD)) -> usize {
     DIRS.iter()
-        .filter(|(_, dir)| m.contains(&(check.0 + dir.0, check.1 + dir.1)))
+        .filter(|(_, dir)| black_tiles.contains(&(check.0 + dir.0, check.1 + dir.1)))
         .count()
 }
 
-fn part2(v: &[&str]) -> usize {
-    let mut m = get_map(v);
+fn part2(init_flips: &[&str]) -> usize {
+    let mut black_tiles = get_black_tiles(init_flips);
     for _ in 0..100 {
-        let mut new_m = HashSet::new();
-        for check in &m {
-            let nr_black_neighbors = count_black_neighbors(&m, check);
+        let mut new_black_tiles = HashSet::new();
+        for check in &black_tiles {
+            let nr_black_neighbors = count_black_neighbors(&black_tiles, check);
+
+            // Check if we should keep this tile black
             if nr_black_neighbors == 1 || nr_black_neighbors == 2 {
-                new_m.insert(*check);
+                new_black_tiles.insert(*check);
             }
+
+            // For all white neighbors, check if we should flip it to black
             for (_, dir) in DIRS.iter() {
                 let white_check = (check.0 + dir.0, check.1 + dir.1);
-                if !m.contains(&white_check) && count_black_neighbors(&m, &white_check) == 2 {
-                    new_m.insert(white_check);
+                if !black_tiles.contains(&white_check)
+                    && count_black_neighbors(&black_tiles, &white_check) == 2
+                {
+                    new_black_tiles.insert(white_check);
                 }
             }
         }
-        m = new_m;
+        black_tiles = new_black_tiles;
     }
-    let result = m.len();
+    let result = black_tiles.len();
     println!("Part2: {}", result);
     result
 }
@@ -78,11 +84,11 @@ fn parse(content: &str) -> Vec<&str> {
 
 fn main() {
     let content = fs::read_to_string("../../inputs/day24_input.txt").expect("Cannot open file!");
-    let v = parse(&content);
+    let init_flips = parse(&content);
 
-    let result_p1 = part1(&v);
+    let result_p1 = part1(&init_flips);
     assert_eq!(result_p1, 523);
-    let result_p2 = part2(&v);
+    let result_p2 = part2(&init_flips);
     assert_eq!(result_p2, 4225);
 }
 
@@ -112,11 +118,11 @@ nenewswnwewswnenesenwnesewesw
 eneswnwswnwsenenwnwnwwseeswneewsenese
 neswnwewnwnwseenwseesewsenwsweewe
 wseweeenwnesenwwwswnew";
-        let v = parse(input);
-        let result = part1(&v);
+        let init_flips = parse(input);
+        let result = part1(&init_flips);
         assert_eq!(result, 10);
 
-        let result = part2(&v);
+        let result = part2(&init_flips);
         assert_eq!(result, 2208);
     }
 }
