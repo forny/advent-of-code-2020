@@ -2,54 +2,41 @@
 //! By Peter Fornwall
 
 fn part(input: &str, size: usize, nr_rounds: usize) -> String {
-    let circle_org: Vec<usize> = input.chars().map(|x| x as usize - '0' as usize).collect();
+    let circle_org: Vec<u32> = input.chars().map(|x| x as u32 - '0' as u32).collect();
 
-    let mut circle: Vec<(usize, usize)> = vec![(0, 0); size + 1];
-    let mut prev_value = if size > input.len() {
-        size
-    } else {
-        *circle_org.last().unwrap()
-    };
-
+    let mut circle: Vec<u32> = vec![0; size + 1];
     for index in 0..size {
-        let cur_value = *circle_org.get(index).unwrap_or(&(index + 1));
-        let mut next_value = *circle_org.get(index + 1).unwrap_or(&(index + 2));
-        if next_value > size {
+        let cur_value = *circle_org.get(index).unwrap_or(&(index as u32 + 1));
+        let mut next_value = *circle_org.get(index + 1).unwrap_or(&(index as u32 + 2));
+        if next_value > size as u32 {
             next_value = circle_org[0];
         }
-        circle[cur_value] = (prev_value, next_value);
-        prev_value = cur_value;
+        circle[cur_value as usize] = next_value;
     }
 
     let mut cur_value = circle_org[0];
     for _ in 1..=nr_rounds {
-        let val1 = circle[cur_value].1;
-        let val2 = circle[val1].1;
-        let val3 = circle[val2].1;
+        let val1 = circle[cur_value as usize];
+        let val2 = circle[val1 as usize];
+        let val3 = circle[val2 as usize];
 
         let mut destination_cup = cur_value;
         loop {
             destination_cup -= 1;
             if destination_cup == 0 {
-                destination_cup = size;
+                destination_cup = size as u32;
             }
             if destination_cup != val1 && destination_cup != val2 && destination_cup != val3 {
                 break;
             }
         }
         // Remove from current list
-        let before_val1 = circle[val1].0;
-        let after_val_3 = circle[val3].1;
-        circle[before_val1].1 = after_val_3;
-        circle[after_val_3].0 = before_val1;
+        circle[cur_value as usize] = circle[val3 as usize];
         // Insert after destination cup
-        let after_destination = circle[destination_cup].1;
-        circle[destination_cup].1 = val1;
-        circle[after_destination].0 = val3;
-        circle[val1].0 = destination_cup;
-        circle[val3].1 = after_destination;
+        circle[val3 as usize] = circle[destination_cup as usize];
+        circle[destination_cup as usize] = val1;
 
-        cur_value = circle[cur_value].1;
+        cur_value = circle[cur_value as usize];
     }
 
     let mut s: String;
@@ -57,13 +44,13 @@ fn part(input: &str, size: usize, nr_rounds: usize) -> String {
         s = String::new();
         let mut current = 1;
         for _ in 1..size {
-            current = circle[current].1;
+            current = circle[current as usize];
             s += &current.to_string();
         }
     } else {
-        let val1 = circle[1].1;
-        let val2 = circle[val1].1;
-        let product = val1 * val2;
+        let val1 = circle[1];
+        let val2 = circle[val1 as usize];
+        let product = val1 as u64 * val2 as u64;
         s = product.to_string();
     }
     s
